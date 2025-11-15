@@ -6,10 +6,10 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 
 def load_data():
-    X_train = pd.read_csv("namadataset_preprocessing/X_train.csv")
-    X_test = pd.read_csv("namadataset_preprocessing/X_test.csv")
-    y_train = pd.read_csv("namadataset_preprocessing/y_train.csv")
-    y_test = pd.read_csv("namadataset_preprocessing/y_test.csv")
+    X_train = pd.read_csv("dataset_preprocessing/X_train.csv")
+    X_test = pd.read_csv("dataset_preprocessing/X_test.csv")
+    y_train = pd.read_csv("dataset_preprocessing/y_train.csv")
+    y_test = pd.read_csv("dataset_preprocessing/y_test.csv")
     return X_train, X_test, y_train, y_test
 
 
