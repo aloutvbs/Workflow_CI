@@ -1,0 +1,6 @@
+name: workflow_ci_msml
+
+entry_points:
+  main:
+    parameters: {}
+    command: "python modelling.py"
