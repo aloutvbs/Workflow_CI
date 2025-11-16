@@ -43,8 +43,18 @@ jobs:
     - name: Build and push Docker image from latest MLflow model
       working-directory: MLProject
       run: |
-        LAST_RUN_ID=$(ls -t mlruns/0 | head -n 1)
+        echo "Finding latest valid MLflow run ID..."
+
+        # Cari folder run-id yang panjang 32 karakter (abaikan datasets/ metadata)
+        LAST_RUN_ID=$(find mlruns/0 -maxdepth 1 -type d -printf "%f\n" | grep -E "^[a-f0-9]{32}$" | head -n 1)
+
+        echo "Detected RUN ID: $LAST_RUN_ID"
+
         MODEL_URI="mlruns/0/$LAST_RUN_ID/artifacts/model"
         echo "Using MODEL_URI=$MODEL_URI"
+
+        # Build Docker image
         mlflow models build-docker -m $MODEL_URI -n "${{ secrets.DOCKERHUB_USERNAME }}/msml-california:latest"
+
+        # Push to Docker Hub
         docker push "${{ secrets.DOCKERHUB_USERNAME }}/msml-california:latest"
