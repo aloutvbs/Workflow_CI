@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  train:
+  train-and-docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +23,28 @@ jobs:
         python -m pip install --upgrade pip
         pip install mlflow==2.19.0 numpy pandas scikit-learn==1.5.2 joblib
 
-    - name: Run MLflow Project
+    - name: Run MLflow Project (train model)
+      working-directory: MLProject
       run: |
-        cd MLProject
         mlflow run . -e main --env-manager=local
+
+    - name: Upload MLflow artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mlflow-artifacts
+        path: MLProject/mlruns
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image from latest MLflow model
+      working-directory: MLProject
+      run: |
+        LAST_RUN_ID=$(ls -t mlruns/0 | head -n 1)
+        MODEL_URI="mlruns/0/$LAST_RUN_ID/artifacts/model"
+        echo "Using MODEL_URI=$MODEL_URI"
+        mlflow models build-docker -m $MODEL_URI -n "${{ secrets.DOCKERHUB_USERNAME }}/msml-california:latest"
+        docker push "${{ secrets.DOCKERHUB_USERNAME }}/msml-california:latest"
